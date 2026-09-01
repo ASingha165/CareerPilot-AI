@@ -368,6 +368,22 @@ export default function RoadmapPage() {
             </div>
           </div>
 
+          <Card>
+            <h3 className="font-semibold text-white mb-2">Interview practice resources</h3>
+            <p className="text-sm text-slate-400">
+              Use the{" "}
+              <a
+                href="https://prachub.com/categories/machine-learning"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2"
+              >
+                PracHub machine learning interview question bank
+              </a>{" "}
+              for company-tagged technical questions alongside mock interview practice.
+            </p>
+          </Card>
+
           {/* Progress bar */}
           <Card>
             <div className="flex items-center justify-between mb-3">
