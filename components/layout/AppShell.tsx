@@ -25,6 +25,7 @@ const navItems = [
   { href: "/career", label: "Career Paths", icon: Target },
   { href: "/roadmap", label: "Roadmap", icon: Map },
   { href: "/interview", label: "Mock Interview", icon: Mic },
+  { href: "/interview-intelligence", label: "Interview Intelligence", icon: Target },
   { href: "/github", label: "GitHub", icon: GitBranch },
   { href: "/skillsbuild", label: "IBM SkillsBuild", icon: BookOpen },
 ];
