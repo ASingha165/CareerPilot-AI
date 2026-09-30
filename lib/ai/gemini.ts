@@ -1,13 +1,15 @@
-import { GoogleGenAI } from "@google/genai";
+import {
+  GoogleGenAI,
+  type ContentListUnion,
+  type GenerateContentConfig,
+} from "@google/genai";
 
 export const PRIMARY_GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
-export const FALLBACK_GEMINI_MODEL = "gemini-2.5-flash-lite";
+export const FALLBACK_GEMINI_MODEL = "gemini-flash-lite-latest";
 
 export const DEFAULT_GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
-
-const ADDITIONAL_FALLBACKS = ["gemini-flash-latest", "gemini-3.5-flash"];
 
 if (!process.env.GEMINI_API_KEY) {
   console.warn(
@@ -128,18 +130,12 @@ export function getGeminiModel(modelName = DEFAULT_GEMINI_MODEL) {
   }
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async generateContent(prompt: string | any[]) {
-      const contents = Array.isArray(prompt) ? prompt : prompt;
+    async generateContent(prompt: ContentListUnion, configOverride?: GenerateContentConfig) {
+      const contents = prompt;
 
       const candidateList: string[] = [modelName];
       if (!candidateList.includes(FALLBACK_GEMINI_MODEL)) {
         candidateList.push(FALLBACK_GEMINI_MODEL);
-      }
-      for (const m of ADDITIONAL_FALLBACKS) {
-        if (!candidateList.includes(m)) {
-          candidateList.push(m);
-        }
       }
 
       const modelStages = candidateList.map((m, index) => {
@@ -166,6 +162,7 @@ export function getGeminiModel(modelName = DEFAULT_GEMINI_MODEL) {
                 topP: 0.95,
                 topK: 40,
                 responseMimeType: "application/json",
+                ...configOverride,
               },
             });
 
@@ -235,4 +232,13 @@ export function getGeminiModel(modelName = DEFAULT_GEMINI_MODEL) {
 
 export function isGeminiConfigured(): boolean {
   return !!genAI;
+}
+
+export async function generateAiContent(
+  prompt: ContentListUnion,
+  configOverride?: GenerateContentConfig
+): Promise<{ text: string }> {
+  const model = getGeminiModel();
+  const res = await model.generateContent(prompt, configOverride);
+  return { text: res.response.text() };
 }

@@ -74,15 +74,47 @@ export function formatDate(dateStr: string): string {
 }
 
 export function safeJsonParse<T>(text: string): T | null {
+  if (!text || typeof text !== "string") return null;
+
+  // 1. Try direct parse
   try {
-    // Strip markdown code fences if Gemini wraps response in ```json ... ```
-    const cleaned = text
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
+    return JSON.parse(text) as T;
+  } catch {}
+
+  // 2. Strip simple markdown fences if present
+  try {
+    const trimmed = text
+      .replace(/^```(?:json)?\s*/i, "")
       .replace(/\s*```$/i, "")
       .trim();
-    return JSON.parse(cleaned) as T;
-  } catch {
-    return null;
-  }
+    return JSON.parse(trimmed) as T;
+  } catch {}
+
+  // 3. Extract content inside any ```json ... ``` or ``` ... ``` block
+  try {
+    const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (match && match[1]) {
+      return JSON.parse(match[1].trim()) as T;
+    }
+  } catch {}
+
+  // 4. Extract between outermost { ... } or [ ... ]
+  try {
+    const firstBrace = text.indexOf("{");
+    const firstBracket = text.indexOf("[");
+    let start = -1;
+    let end = -1;
+    if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+      start = firstBrace;
+      end = text.lastIndexOf("}");
+    } else if (firstBracket !== -1) {
+      start = firstBracket;
+      end = text.lastIndexOf("]");
+    }
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(text.slice(start, end + 1)) as T;
+    }
+  } catch {}
+
+  return null;
 }

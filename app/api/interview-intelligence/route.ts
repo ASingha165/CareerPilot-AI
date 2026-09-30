@@ -104,13 +104,26 @@ Rules:
 - Make recommendations specific to the role and supplied gaps.
 `;
 
-    const result = await getGeminiModel().generateContent(prompt);
-    const parsed = safeJsonParse<IntelligenceResponse>(result.response.text());
-    if (!parsed) throw new Error("Failed to parse interview intelligence response");
+    try {
+      const result = await getGeminiModel().generateContent(prompt);
+      const text = result.response.text();
+      const parsed = safeJsonParse<IntelligenceResponse>(text);
+      if (parsed) {
+        return NextResponse.json({ ...parsed, isMock: false });
+      }
+      console.warn("[API /interview-intelligence] Parsing failed, falling back to heuristic strategy.");
+    } catch (aiError) {
+      console.error("[API /interview-intelligence] AI generation error:", aiError);
+    }
 
-    return NextResponse.json({ ...parsed, isMock: false });
+    // Gracefully fall back to rule-based interview strategy so user flow succeeds
+    return NextResponse.json({
+      ...fallback(role, company, body.skillGaps),
+      isMock: true,
+      message: "AI analysis is temporarily unavailable. Showing estimated readiness profile.",
+    });
   } catch (error) {
-    console.error("Interview intelligence error:", error);
+    console.error("Interview intelligence unexpected error:", error);
     return NextResponse.json({ error: "Unable to generate interview intelligence" }, { status: 500 });
   }
 }

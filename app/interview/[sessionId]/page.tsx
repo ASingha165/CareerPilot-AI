@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -211,9 +211,9 @@ function InterviewResultView({
 export default function InterviewSessionPage({
   params,
 }: {
-  params: Promise<{ sessionId: string }>;
+  params: { sessionId: string };
 }) {
-  const { sessionId } = use(params);
+  const { sessionId } = params;
   const router = useRouter();
   const {
     activeInterviewSession,
