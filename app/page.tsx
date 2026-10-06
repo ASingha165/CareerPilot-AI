@@ -117,16 +117,27 @@ export default function LandingPage() {
               </div>
               <span className="text-xl font-bold text-white">CareerPilot</span>
             </div>
-            <div className="hidden md:flex items-center gap-8 text-sm text-slate-400">
+            <div className="hidden md:flex items-center gap-6 text-sm text-slate-400">
               <a href="#features" className="hover:text-white transition-colors">Features</a>
               <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+              <Link href="/login" className="hover:text-white text-slate-300 font-medium transition-colors">
+                Sign In
+              </Link>
             </div>
-            <Link
-              href="/onboarding"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-            >
-              Get Started <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="md:hidden text-xs text-slate-300 hover:text-white font-medium px-2 py-1"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all shadow-md shadow-blue-500/20"
+              >
+                Sign Up <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -140,33 +151,33 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium px-4 py-2 rounded-full mb-8">
             <Sparkles className="w-4 h-4" />
-            Powered by Google Gemini AI
+            Living Student Career Profile · Powered by Gemini AI
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-            Your AI-powered
+            Your living AI
             <br />
             <span className="text-gradient">career copilot</span>
           </h1>
 
           <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            CareerPilot doesn&apos;t just tell you what career to choose.
-            It tells you <strong className="text-white">exactly what to do next</strong> to become ready for that career.
+            Maintain an evolving profile of your skills, projects, and achievements.
+            CareerPilot continuously re-analyzes your growth into personalized career guidance, skill gaps, and interview prep.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link
-              href="/onboarding"
-              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-xl text-lg transition-all hover:scale-105 glow-blue"
+              href="/signup"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold px-8 py-4 rounded-xl text-lg transition-all hover:scale-105 shadow-xl shadow-blue-500/25"
             >
-              Start Career Assessment
+              Start Your Living Profile
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/dashboard"
-              className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all"
+              className="flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all"
             >
-              View Dashboard
+              Open Dashboard
             </Link>
           </div>
 

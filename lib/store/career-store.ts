@@ -13,9 +13,16 @@ import type {
   InterviewSession,
   GitHubAnalysis,
   SkillsBuildResource,
+  FullUserProfile,
+  ActivityRecord,
 } from "@/lib/types";
 
 const initialState: AppState = {
+  user: null,
+  fullProfile: null,
+  isAiAnalysisStale: false,
+  completeness: null,
+  activities: [],
   profile: null,
   onboardingComplete: false,
   resumeText: null,
@@ -34,10 +41,99 @@ const initialState: AppState = {
   error: null,
 };
 
+// Helper to convert FullUserProfile to legacy CareerProfile for backward-compatibility
+function convertToLegacyProfile(fp: FullUserProfile): CareerProfile {
+  const firstEdu = fp.education[0];
+  return {
+    name: fp.user.name,
+    education: firstEdu?.institution || "Student",
+    degree: firstEdu?.degree || "Undergraduate",
+    branch: firstEdu?.fieldOfStudy || "Computer Science",
+    graduationYear: firstEdu?.endYear || new Date().getFullYear(),
+    interests: fp.profile.careerPreferences.careerInterests || [],
+    currentSkills: fp.skills.map((s) => s.name),
+    preferredIndustries: fp.profile.careerPreferences.preferredIndustry
+      ? [fp.profile.careerPreferences.preferredIndustry]
+      : ["Technology"],
+    careerGoals: fp.profile.personal.bio || "Advance tech career",
+    targetRoles: fp.profile.careerPreferences.targetRoles || ["Software Developer"],
+    experienceLevel: fp.experience.length > 0 ? "intern" : "student",
+  };
+}
+
 export const useCareerStore = create<AppState & AppActions>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
+
+      setUser: (user) => set({ user }),
+
+      setFullProfile: (fullProfile) => {
+        if (!fullProfile) {
+          set({
+            fullProfile: null,
+            user: null,
+            completeness: null,
+            activities: [],
+            isAiAnalysisStale: false,
+          });
+          return;
+        }
+
+        const legacyProfile = convertToLegacyProfile(fullProfile);
+        const latestAnalysis = fullProfile.latestAnalysis;
+
+        set({
+          fullProfile,
+          user: fullProfile.user,
+          profile: legacyProfile,
+          onboardingComplete: true,
+          completeness: fullProfile.completeness,
+          activities: fullProfile.activities || [],
+          isAiAnalysisStale: fullProfile.profile.isAiAnalysisStale,
+          selectedCareer:
+            fullProfile.profile.careerPreferences.targetRoles[0] ||
+            get().selectedCareer ||
+            "Software Developer",
+          ...(latestAnalysis
+            ? {
+                recommendations: latestAnalysis.recommendations,
+                readinessScore: latestAnalysis.readinessScore,
+                roadmap: latestAnalysis.roadmap,
+              }
+            : {}),
+        });
+      },
+
+      setIsAiAnalysisStale: (isAiAnalysisStale) =>
+        set((state) => ({
+          isAiAnalysisStale,
+          fullProfile: state.fullProfile
+            ? {
+                ...state.fullProfile,
+                profile: {
+                  ...state.fullProfile.profile,
+                  isAiAnalysisStale,
+                },
+              }
+            : null,
+        })),
+
+      setActivities: (activities: ActivityRecord[]) => set({ activities }),
+
+      refreshFullProfile: async () => {
+        try {
+          const res = await fetch("/api/profile");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.profile) {
+              get().setFullProfile(data.profile);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to refresh profile:", err);
+        }
+      },
 
       setProfile: (profile: CareerProfile) =>
         set({ profile }),
@@ -104,8 +200,8 @@ export const useCareerStore = create<AppState & AppActions>()(
     {
       name: "careerpilot-store",
       storage: createJSONStorage(() => localStorage),
-      // Only persist essential data, not transient loading states
       partialize: (state) => ({
+        user: state.user,
         profile: state.profile,
         onboardingComplete: state.onboardingComplete,
         resumeAnalysis: state.resumeAnalysis,

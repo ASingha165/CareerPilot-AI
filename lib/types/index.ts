@@ -218,9 +218,33 @@ export interface GitHubAnalysis {
   suggestions: string[];
 }
 
+// Re-export persistent entity models
+export * from "@/lib/db/types";
+
+import type {
+  FullUserProfile,
+  ProfileCompleteness,
+  ActivityRecord,
+  AuthProvider,
+} from "@/lib/db/types";
+
 // ---- App Store State ----------------------------------------
 
 export interface AppState {
+  // Auth & Persistent Profile
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    googleId?: string | null;
+    avatar?: string | null;
+    authProvider?: AuthProvider;
+  } | null;
+  fullProfile: FullUserProfile | null;
+  isAiAnalysisStale: boolean;
+  completeness: ProfileCompleteness | null;
+  activities: ActivityRecord[];
+
   // Onboarding
   profile: CareerProfile | null;
   onboardingComplete: boolean;
@@ -257,6 +281,20 @@ export interface AppState {
 }
 
 export interface AppActions {
+  setUser: (
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      googleId?: string | null;
+      avatar?: string | null;
+      authProvider?: AuthProvider;
+    } | null
+  ) => void;
+  setFullProfile: (fullProfile: FullUserProfile | null) => void;
+  setIsAiAnalysisStale: (val: boolean) => void;
+  setActivities: (activities: ActivityRecord[]) => void;
+  refreshFullProfile: () => Promise<void>;
   setProfile: (profile: CareerProfile) => void;
   setOnboardingComplete: (val: boolean) => void;
   setResumeAnalysis: (
@@ -277,3 +315,4 @@ export interface AppActions {
   setError: (error: string | null) => void;
   reset: () => void;
 }
+
